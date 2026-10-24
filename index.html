@@ -1,189 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Weather Animation</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; color: #fff; overflow: hidden; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cosmic.dev — Beyond the Ordinary</title>
+<style>
+  :root {
+    --bg: #050713;
+    --text: #f5f7ff;
+    --muted: #a5b0cc;
+    --cyan: #66eaff;
+    --purple: #9d7bff;
+    --glass: rgba(14, 20, 45, .58);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--text); background: var(--bg);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -2;
+    background:
+      radial-gradient(ellipse at 75% 20%, rgba(66, 48, 155, .22), transparent 38%),
+      radial-gradient(ellipse at 15% 65%, rgba(0, 153, 205, .12), transparent 35%),
+      linear-gradient(180deg, #050713 0%, #080b20 55%, #050713 100%);
+  }
+  #stars { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+  a { color: inherit; text-decoration: none; }
+  .nav {
+    position: fixed; z-index: 20; top: 0; left: 0; width: 100%;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px clamp(20px, 6vw, 88px);
+    background: linear-gradient(180deg, rgba(5,7,19,.85), rgba(5,7,19,0));
+    backdrop-filter: blur(8px);
+  }
+  .brand { display: flex; gap: 10px; align-items: center; font-weight: 800; letter-spacing: .08em; }
+  .brand-mark { width: 27px; height: 27px; border: 2px solid var(--cyan); border-radius: 50%; position: relative; box-shadow: 0 0 18px #66eaff55; }
+  .brand-mark::after { content: ""; position: absolute; width: 34px; height: 11px; border: 1px solid var(--purple); border-radius: 50%; left: -6px; top: 6px; transform: rotate(-35deg); }
+  .brand span { color: var(--cyan); }
+  .nav-links { display: flex; gap: clamp(16px, 3vw, 36px); align-items: center; color: #c1c9df; font-size: 13px; }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-cta { border: 1px solid #66eaff88; padding: 10px 16px; border-radius: 999px; box-shadow: inset 0 0 16px #66eaff0d; }
+  .hero {
+    min-height: 100vh; position: relative; display: grid; grid-template-columns: 1.05fr .95fr;
+    align-items: center; padding: 120px clamp(20px, 8vw, 120px) 70px; gap: 20px; isolation: isolate;
+  }
+  .hero-copy { max-width: 650px; position: relative; z-index: 3; }
+  .eyebrow { color: var(--cyan); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; display: flex; gap: 12px; align-items: center; }
+  .eyebrow::before { content: ""; width: 35px; height: 1px; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+  h1 { font-size: clamp(46px, 6.3vw, 88px); line-height: .98; letter-spacing: -.065em; margin: 24px 0; font-weight: 850; }
+  h1 .gradient { background: linear-gradient(100deg, #f7f8ff 5%, #72eaff 48%, #a78bff 90%); color: transparent; -webkit-background-clip: text; background-clip: text; }
+  .intro { color: var(--muted); max-width: 490px; line-height: 1.8; font-size: 15px; }
+  .actions { display: flex; gap: 13px; flex-wrap: wrap; margin-top: 30px; }
+  .btn { padding: 14px 19px; border-radius: 7px; font-size: 12px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 10px; transition: .25s ease; cursor: pointer; }
+  .btn-primary { color: #06101d; background: linear-gradient(100deg, var(--cyan), #a5f3ff); box-shadow: 0 0 28px #66eaff32; border: 0; }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 0 36px #66eaff66; }
+  .btn-secondary { border: 1px solid #a3b4d655; background: rgba(255,255,255,.025); }
+  .btn-secondary:hover { border-color: var(--purple); color: #cbbcff; transform: translateY(-3px); }
+  .stats { display: flex; gap: clamp(20px, 4vw, 46px); margin-top: 48px; }
+  .stat strong { display: block; font-size: 22px; letter-spacing: -.04em; }
+  .stat small { display: block; color: #7886a9; font-size: 9px; letter-spacing: .16em; margin-top: 6px; }
+  .space-scene { min-height: 500px; position: relative; display: grid; place-items: center; perspective: 900px; }
+  .planet-wrap { width: min(34vw, 410px); aspect-ratio: 1; position: relative; transform-style: preserve-3d; animation: float 6s ease-in-out infinite; }
+  .planet {
+    position: absolute; inset: 10%; border-radius: 50%; overflow: hidden;
+    background:
+      radial-gradient(circle at 28% 24%, #d5faff 0, #6bd8ef 4%, transparent 18%),
+      radial-gradient(ellipse at 28% 33%, #4276d6 0, #263f9e 24%, transparent 42%),
+      radial-gradient(ellipse at 70% 70%, #5d39b7 0, #19215c 45%, #070a25 76%);
+    box-shadow: inset -32px -20px 45px #02030c, inset 10px 5px 35px #b8f8ff55, 0 0 70px #626bff45;
+  }
+  .planet::before {
+    content: ""; position: absolute; inset: -20%; border-radius: 50%;
+    background: repeating-linear-gradient(165deg, transparent 0 17px, #9ceeff17 18px 20px, transparent 21px 32px);
+    transform: rotate(-20deg); mix-blend-mode: screen;
+    animation: surfaceSpin 18s linear infinite;
+  }
+  .planet::after { content: ""; position: absolute; width: 120%; height: 24%; left: -10%; top: 43%; border-top: 2px solid #b9f7ff99; border-bottom: 1px solid #9c8bff66; border-radius: 50%; transform: rotate(-24deg); filter: blur(.2px); }
+  .ring { position: absolute; width: 140%; height: 36%; left: -20%; top: 36%; border: 2px solid #b0a3ffb5; border-left-color: #68eaff88; border-right-color: #b7a5ff33; border-radius: 50%; transform: rotate(-23deg) rotateX(65deg); box-shadow: 0 0 18px #887aff44; }
+  .ring-back { z-index: -1; opacity: .55; }
+  .moon { position: absolute; width: 32px; height: 32px; border-radius: 50%; right: 6%; top: 17%; background: radial-gradient(circle at 30% 25%, #fff, #9da7d9 22%, #33365f 70%); box-shadow: 0 0 20px #abbcff55; }
+  .orbit { position: absolute; width: 118%; height: 45%; left: -9%; top: 29%; border: 1px solid #8c9dff22; border-radius: 50%; transform: rotate(-23deg); }
+  .hud {
+    position: absolute; right: -2%; bottom: 11%; padding: 16px 18px; min-width: 170px;
+    border: 1px solid #8f9fff55; border-radius: 12px; background: rgba(9,14,36,.72);
+    backdrop-filter: blur(14px); box-shadow: 0 12px 45px #0005; animation: float 5s ease-in-out infinite reverse;
+  }
+  .hud-top { color: var(--cyan); font-size: 9px; letter-spacing: .18em; display: flex; gap: 8px; align-items: center; }
+  .pulse { width: 6px; height: 6px; background: #61f6c7; border-radius: 50%; box-shadow: 0 0 10px #61f6c7; }
+  .hud strong { display: block; font-size: 18px; margin: 9px 0 5px; }
+  .hud small { color: #8492b4; font-size: 10px; }
+  .scroll-note { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: #6f7b9d; font-size: 9px; letter-spacing: .22em; display: flex; gap: 10px; align-items: center; }
+  .scroll-note::before { content: ""; height: 25px; width: 1px; background: linear-gradient(var(--cyan), transparent); }
+  section.content { padding: 100px clamp(20px, 8vw, 120px); position: relative; }
+  .section-kicker { color: var(--cyan); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; }
+  h2 { font-size: clamp(32px, 4vw, 52px); letter-spacing: -.05em; margin: 12px 0 15px; }
+  .section-intro { color: var(--muted); line-height: 1.8; max-width: 620px; font-size: 14px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 38px; }
+  .card { padding: 25px; border-radius: 14px; border: 1px solid #8e9fff25; background: linear-gradient(140deg, rgba(30,39,77,.55), rgba(9,13,32,.6)); transition: transform .3s, border-color .3s, box-shadow .3s; transform-style: preserve-3d; }
+  .card:hover { transform: translateY(-7px) rotateX(2deg); border-color: #66eaff77; box-shadow: 0 16px 45px #0004, 0 0 25px #66eaff0b; }
+  .card-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 11px; color: var(--cyan); background: #66eaff10; border: 1px solid #66eaff32; font-size: 20px; }
+  .card h3 { font-size: 17px; margin: 22px 0 9px; }
+  .card p { color: #929fbd; line-height: 1.7; font-size: 13px; margin: 0; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .tag { color: #aeb9d8; font-size: 10px; border: 1px solid #a1b2e52c; padding: 6px 9px; border-radius: 999px; }
+  .contact-box { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: clamp(25px, 5vw, 55px); border: 1px solid #8b9aff3b; border-radius: 20px; background: radial-gradient(ellipse at 100% 0, #4d3f9b33, transparent 45%), rgba(15,20,46,.58); }
+  .contact-box h2 { max-width: 570px; }
+  footer { padding: 25px clamp(20px, 8vw, 120px); display: flex; justify-content: space-between; gap: 20px; color: #6f7c9b; font-size: 11px; border-top: 1px solid #a4b4e514; }
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  @keyframes float { 0%,100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-15px) rotateY(5deg); } }
+  @keyframes twinkle { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
 
-    /* Sky backgrounds */
-    #sky {
-      position: fixed; inset: 0;
-      transition: background 1s;
-      background: linear-gradient(#4aa8ff, #bfe3ff);
-    }
-    #sky.sunny  { background: linear-gradient(#2e9bff, #bfe3ff); }
-    #sky.cloudy { background: linear-gradient(#7d8b99, #c3cbd3); }
-    #sky.rainy  { background: linear-gradient(#3b4754, #6c7a89); }
-    #sky.snowy  { background: linear-gradient(#8fa6bd, #e6eef6); }
-    #sky.stormy { background: linear-gradient(#1d2430, #3a4556); }
+  /* Extra competition-ready motion effects */
+  .planet { animation: planetGlow 5s ease-in-out infinite alternate; }
+  .planet-wrap { will-change: transform; }
+  .moon { animation: moonOrbit 12s linear infinite; transform-origin: -95px 105px; }
+  .ring { animation: ringPulse 4s ease-in-out infinite; }
+  .ring-back { animation-delay: -2s; }
+  .btn-primary { position: relative; overflow: hidden; }
+  .btn-primary::after {
+    content: ""; position: absolute; top: -60%; left: -45%; width: 30%; height: 220%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+    transform: rotate(25deg); animation: buttonShine 4.5s ease-in-out infinite;
+  }
+  .card-icon { transition: transform .35s ease, box-shadow .35s ease; }
+  .card:hover .card-icon { transform: translateY(-3px) rotate(-8deg) scale(1.08); box-shadow: 0 0 24px #66eaff25; }
+  .hero-copy .eyebrow { animation: fadeSlideIn .8s both; }
+  .hero-copy h1 { animation: fadeSlideIn .9s .12s both; }
+  .hero-copy .intro { animation: fadeSlideIn .9s .24s both; }
+  .hero-copy .actions { animation: fadeSlideIn .9s .36s both; }
+  .hero-copy .stats { animation: fadeSlideIn .9s .48s both; }
+  .shooting-star {
+    position: fixed; width: 130px; height: 2px; pointer-events: none; z-index: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0), #a8f5ff, rgba(255,255,255,0));
+    filter: drop-shadow(0 0 6px #66eaff); transform: rotate(-35deg);
+    animation: shoot 1.15s linear forwards;
+  }
+  @keyframes planetGlow {
+    from { filter: brightness(.9) saturate(1); }
+    to { filter: brightness(1.13) saturate(1.25); }
+  }
+  /* Rotating surface detail makes the planet visibly spin on its axis. */
+  @keyframes surfaceSpin {
+    from { transform: rotate(-20deg) translateX(-8%); }
+    to { transform: rotate(340deg) translateX(8%); }
+  }
+  @keyframes moonOrbit {
+    from { transform: rotate(0deg) translateX(7px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(7px) rotate(-360deg); }
+  }
+  @keyframes ringPulse {
+    0%,100% { filter: brightness(.85); box-shadow: 0 0 10px #887aff22; }
+    50% { filter: brightness(1.35); box-shadow: 0 0 23px #887aff66; }
+  }
+  @keyframes buttonShine {
+    0%, 65% { left: -45%; }
+    100% { left: 145%; }
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shoot {
+    from { opacity: 0; translate: 0 0; }
+    12% { opacity: 1; }
+    to { opacity: 0; translate: -320px 190px; }
+  }
 
-    /* UI */
-    .panel {
-      position: relative; z-index: 10;
-      text-align: center; padding: 24px 16px;
-    }
-    h1 { font-size: 1.6rem; margin-bottom: 6px; }
-    #info { font-size: 2.2rem; margin: 10px 0; text-shadow: 0 2px 8px rgba(0,0,0,.3); }
-    .controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
-    button, input {
-      padding: 9px 14px; border-radius: 20px; border: none; font-size: 1rem;
-    }
-    button { background: rgba(255,255,255,.85); color: #222; cursor: pointer; }
-    button:hover, button.active { background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.5); }
-    input { width: 180px; }
-
-    /* Sun */
-    #sun {
-      display: none; position: absolute; top: 28%; left: 50%;
-      width: 120px; height: 120px; margin-left: -60px;
-      background: #ffd93b; border-radius: 50%;
-      box-shadow: 0 0 60px 20px rgba(255,217,59,.7);
-      animation: pulse 3s ease-in-out infinite;
-    }
-    #sky.sunny #sun { display: block; }
-    @keyframes pulse { 50% { transform: scale(1.08); } }
-
-    /* Clouds */
-    .cloud {
-      display: none; position: absolute; width: 140px; height: 45px;
-      background: #fff; border-radius: 50px; opacity: .9;
-      animation: drift linear infinite;
-    }
-    .cloud::before, .cloud::after {
-      content: ""; position: absolute; background: #fff; border-radius: 50%;
-    }
-    .cloud::before { width: 60px; height: 60px; top: -28px; left: 20px; }
-    .cloud::after  { width: 45px; height: 45px; top: -20px; left: 70px; }
-    #sky.sunny .cloud.c1, #sky.sunny .cloud.c2 { display: block; }
-    #sky.cloudy .cloud, #sky.rainy .cloud, #sky.snowy .cloud, #sky.stormy .cloud { display: block; }
-    #sky.rainy .cloud, #sky.stormy .cloud { background: #5b6672; }
-    #sky.rainy .cloud::before, #sky.rainy .cloud::after,
-    #sky.stormy .cloud::before, #sky.stormy .cloud::after { background: #5b6672; }
-    .c1 { top: 22%; animation-duration: 40s; }
-    .c2 { top: 40%; animation-duration: 55s; animation-delay: -20s; transform: scale(1.3); }
-    .c3 { top: 15%; animation-duration: 48s; animation-delay: -35s; }
-    .c4 { top: 55%; animation-duration: 62s; animation-delay: -10s; transform: scale(.8); }
-    @keyframes drift { from { left: -200px; } to { left: 110%; } }
-
-    /* Rain & snow particles (created by JS) */
-    .drop {
-      position: absolute; top: -20px; width: 2px; height: 16px;
-      background: rgba(190,220,255,.8); animation: fall linear infinite;
-    }
-    .flake {
-      position: absolute; top: -20px; width: 8px; height: 8px;
-      background: #fff; border-radius: 50%; animation: fall linear infinite;
-    }
-    @keyframes fall { to { transform: translateY(110vh); } }
-
-    /* Lightning */
-    #flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 5; }
-    #sky.stormy ~ #flash { animation: flash 5s infinite; }
-    @keyframes flash {
-      0%, 88%, 92%, 100% { opacity: 0; }
-      90%, 94% { opacity: .8; }
-    }
-  </style>
+  @media (max-width: 850px) {
+    .hero { grid-template-columns: 1fr; padding-top: 135px; }
+    .hero-copy { text-align: center; margin: auto; }
+    .eyebrow, .actions, .stats { justify-content: center; }
+    .intro { margin-inline: auto; }
+    .space-scene { min-height: 390px; }
+    .planet-wrap { width: min(68vw, 330px); }
+    .hud { right: 3%; bottom: 3%; }
+    .cards { grid-template-columns: 1fr; }
+    .contact-box { flex-direction: column; align-items: flex-start; }
+    .scroll-note { display: none; }
+  }
+  @media (max-width: 520px) {
+    .nav { padding: 16px 18px; }
+    .nav-links { gap: 12px; font-size: 11px; }
+    .nav-cta { display: none; }
+    h1 { font-size: clamp(43px, 13vw, 62px); }
+    .stats { gap: 18px; }
+    .stat strong { font-size: 19px; }
+    .stat small { font-size: 8px; }
+    section.content { padding-top: 75px; padding-bottom: 75px; }
+    footer { flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
 </head>
 <body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<header class="nav">
+  <a class="brand" href="#home" aria-label="Cosmic home"><span class="brand-mark"></span> COSMIC<span>.DEV</span></a>
+  <nav class="nav-links" aria-label="Main navigation">
+    <a href="#home">Home</a><a href="#about">About</a><a href="#projects">Projects</a><a href="#contact">Contact</a>
+    <a class="nav-cta" href="#contact">Let's Connect ↗</a>
+  </nav>
+</header>
 
-  <div id="sky" class="sunny">
-    <div id="sun"></div>
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-    <div class="cloud c4"></div>
-    <div id="particles"></div>
-  </div>
-  <div id="flash"></div>
-
-  <div class="panel">
-    <h1>Weather Animation</h1>
-    <div id="info">☀️ Sunny</div>
-
-    <div class="controls" id="buttons">
-      <button data-w="sunny">☀️ Sunny</button>
-      <button data-w="cloudy">☁️ Cloudy</button>
-      <button data-w="rainy">🌧️ Rainy</button>
-      <button data-w="snowy">❄️ Snowy</button>
-      <button data-w="stormy">⛈️ Stormy</button>
+<main>
+  <section class="hero" id="home">
+    <div class="hero-copy">
+      <div class="eyebrow">AI / ML ENGINEER · CREATIVE DEVELOPER</div>
+      <h1>BUILDING<br><span class="gradient">BEYOND</span><br>THE ORDINARY.</h1>
+      <p class="intro">Exploring the universe of code, intelligence, and immersive digital experiences. I turn curious ideas into things you can see, use, and feel.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#projects">Explore my world <span>↗</span></a>
+        <a class="btn btn-secondary" href="#about">Discover more <span>↓</span></a>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong>03</strong><small>PROJECTS IN ORBIT</small></div>
+        <div class="stat"><strong>05+</strong><small>TECHNOLOGIES</small></div>
+        <div class="stat"><strong>∞</strong><small>CURIOSITY</small></div>
+      </div>
     </div>
-
-    <div class="controls">
-      <input id="city" placeholder="Enter city (e.g. Jaipur)">
-      <button onclick="getLiveWeather()">Get live weather</button>
+    <div class="space-scene" aria-label="Animated planet illustration">
+      <div class="planet-wrap" id="planetWrap">
+        <div class="orbit"></div><div class="ring ring-back"></div>
+        <div class="planet"></div><div class="ring"></div><div class="moon"></div>
+      </div>
+      <div class="hud">
+        <div class="hud-top"><span class="pulse"></span> SYSTEM ONLINE</div>
+        <strong>Creativity: 100%</strong>
+        <small>Mission status · Exploring</small>
+      </div>
     </div>
-  </div>
+    <div class="scroll-note">SCROLL TO EXPLORE</div>
+  </section>
 
-  <script>
-    const sky = document.getElementById("sky");
-    const info = document.getElementById("info");
-    const particles = document.getElementById("particles");
+  <section class="content" id="about">
+    <div class="reveal">
+      <div class="section-kicker">01 / The explorer</div>
+      <h2>Curiosity is my <span class="gradient">superpower.</span></h2>
+      <p class="section-intro">I'm an AI/ML engineering student fascinated by the intersection of technology and creativity. Every project is a new planet to explore — a chance to learn, experiment, and build something meaningful.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal"><div class="card-icon">⌘</div><h3>Code & Create</h3><p>Turning ideas into responsive interfaces with clean structure, thoughtful design, and useful interactions.</p><div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div></article>
+      <article class="card reveal"><div class="card-icon">✧</div><h3>Explore AI</h3><p>Learning how intelligent systems can solve real problems and create more helpful digital experiences.</p><div class="tags"><span class="tag">AI / ML</span><span class="tag">Python · learning</span></div></article>
+      <article class="card reveal"><div class="card-icon">◎</div><h3>Think in 3D</h3><p>Mixing motion, depth, color, and interaction to make websites feel like experiences, not just pages.</p><div class="tags"><span class="tag">Animation</span><span class="tag">UI Design</span></div></article>
+    </div>
+  </section>
 
-    const labels = {
-      sunny: "☀️ Sunny", cloudy: "☁️ Cloudy", rainy: "🌧️ Rainy",
-      snowy: "❄️ Snowy", stormy: "⛈️ Stormy"
-    };
+  <section class="content" id="projects">
+    <div class="reveal">
+      <div class="section-kicker">02 / Mission log</div>
+      <h2>Projects from <span class="gradient">my universe.</span></h2>
+      <p class="section-intro">A few concepts and builds from my learning journey. Replace these sample cards with your real projects as you create them.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal"><div class="card-icon">♧</div><h3>Smart Waste Sorter</h3><p>A concept for smarter waste segregation, combining sustainability with a technology-first approach.</p><div class="tags"><span class="tag">Innovation</span><span class="tag">Sustainability</span></div></article>
+      <article class="card reveal"><div class="card-icon">☼</div><h3>LiFi Data Transfer</h3><p>Exploring how light can transmit information through a simple electronics and communication prototype.</p><div class="tags"><span class="tag">Electronics</span><span class="tag">Prototype</span></div></article>
+      <article class="card reveal"><div class="card-icon">✦</div><h3>Cosmic Portfolio</h3><p>This interactive space-inspired portfolio: a playground for responsive design, motion, and visual storytelling.</p><div class="tags"><span class="tag">Frontend</span><span class="tag">Creative UI</span></div></article>
+    </div>
+  </section>
 
-    function setWeather(type, extra = "") {
-      sky.className = type;
-      info.textContent = labels[type] + extra;
-      particles.innerHTML = "";
+  <section class="content" id="contact">
+    <div class="contact-box reveal">
+      <div><div class="section-kicker">03 / Open channel</div><h2>Have an idea? Let's send it <span class="gradient">into orbit.</span></h2><p class="section-intro">Open to learning, collaboration, and building cool things with curious people.</p></div>
+      <a class="btn btn-primary" href="mailto:hello@example.com">Say hello <span>↗</span></a>
+    </div>
+  </section>
+</main>
+<footer><span>© <span id="year"></span> SPACE 3D PORTFOLIO · BUILT WITH CURIOSITY</span><span>MADE ON EARTH · DREAMING BEYOND 🌌</span></footer>
 
-      if (type === "rainy" || type === "stormy") makeParticles("drop", 120, 0.5, 1.0);
-      if (type === "snowy") makeParticles("flake", 80, 4, 8);
-
-      document.querySelectorAll("#buttons button").forEach(b =>
-        b.classList.toggle("active", b.dataset.w === type));
+<script>
+  // Draw a lightweight animated starfield without any external libraries.
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [], width = 0, height = 0, dpr = 1;
+  function resizeStars() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth; height = window.innerHeight;
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.min(180, Math.floor(width * height / 7000));
+    stars = Array.from({length: count}, () => ({
+      x: Math.random() * width, y: Math.random() * height,
+      r: Math.random() * 1.4 + .2, alpha: Math.random() * .65 + .2,
+      speed: Math.random() * .22 + .03, phase: Math.random() * Math.PI * 2
+    }));
+  }
+  let frame = 0;
+  function drawStars() {
+    ctx.clearRect(0, 0, width, height);
+    frame += .012;
+    for (const s of stars) {
+      const twinkle = .55 + Math.sin(frame * (1 + s.speed) + s.phase) * .35;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(190,220,255,${Math.max(.08, s.alpha * twinkle)})`; ctx.fill();
+      s.y += s.speed * .22;
+      if (s.y > height + 2) { s.y = -2; s.x = Math.random() * width; }
     }
+    requestAnimationFrame(drawStars);
+  }
+  resizeStars(); drawStars();
+  window.addEventListener('resize', resizeStars);
 
-    function makeParticles(cls, count, minDur, maxDur) {
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
-        p.className = cls;
-        p.style.left = Math.random() * 100 + "%";
-        p.style.animationDuration = (minDur + Math.random() * (maxDur - minDur)) + "s";
-        p.style.animationDelay = (-Math.random() * maxDur) + "s";
-        particles.appendChild(p);
+  // Reveal cards as they enter the viewport.
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
       }
-    }
+    });
+  }, { threshold: 0.14 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    document.querySelectorAll("#buttons button").forEach(b =>
-      b.addEventListener("click", () => setWeather(b.dataset.w)));
+  // Gentle mouse parallax on the planet.
+  const scene = document.querySelector('.space-scene');
+  const planet = document.getElementById('planetWrap');
+  if (window.matchMedia('(pointer:fine)').matches) {
+    scene.addEventListener('mousemove', e => {
+      const rect = scene.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - .5;
+      const y = (e.clientY - rect.top) / rect.height - .5;
+      planet.style.animationPlayState = 'paused';
+      planet.style.transform = `translate(${x * 15}px, ${y * 12}px) rotateY(${x * 12}deg) rotateX(${-y * 9}deg)`;
+    });
+    scene.addEventListener('mouseleave', () => {
+      planet.style.animationPlayState = 'running';
+      planet.style.transform = '';
+    });
+  }
 
-    // Live weather using the free Open-Meteo API (no key needed)
-    async function getLiveWeather() {
-      const city = document.getElementById("city").value.trim();
-      if (!city) return;
-      try {
-        const geo = await (await fetch(
-          "https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + encodeURIComponent(city)
-        )).json();
-        if (!geo.results) { info.textContent = "City not found"; return; }
-        const { latitude, longitude, name } = geo.results[0];
+  // Occasional shooting stars add motion without overwhelming the page.
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function createShootingStar() {
+    if (reducedMotion || document.hidden) return;
+    const star = document.createElement('span');
+    star.className = 'shooting-star';
+    star.style.left = (Math.random() * 85 + 10) + 'vw';
+    star.style.top = (Math.random() * 38 + 4) + 'vh';
+    document.body.appendChild(star);
+    star.addEventListener('animationend', () => star.remove(), { once: true });
+  }
+  if (!reducedMotion) {
+    setInterval(createShootingStar, 3600);
+    setTimeout(createShootingStar, 900);
+  }
 
-        const w = await (await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-        )).json();
-        const code = w.current_weather.weathercode;
-        const temp = Math.round(w.current_weather.temperature);
+  // Small tilt effect on project cards for desktop pointer devices.
+  if (window.matchMedia('(pointer:fine)').matches && !reducedMotion) {
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mousemove', event => {
+        const rect = card.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width;
+        const py = (event.clientY - rect.top) / rect.height;
+        card.style.transform = `translateY(-7px) rotateX(${(0.5 - py) * 5}deg) rotateY(${(px - 0.5) * 5}deg)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  }
 
-        let type = "sunny";
-        if (code >= 1 && code <= 48) type = "cloudy";
-        if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) type = "rainy";
-        if ((code >= 71 && code <= 77) || code === 85 || code === 86) type = "snowy";
-        if (code >= 95) type = "stormy";
-
-        setWeather(type, ` · ${temp}°C · ${name}`);
-      } catch (e) {
-        info.textContent = "Could not load weather";
-      }
-    }
-
-    setWeather("sunny");
-  </script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
